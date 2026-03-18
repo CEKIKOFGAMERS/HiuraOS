@@ -1,25 +1,41 @@
-bits 64
+bits 32
 
-section .multiboot
+; =============================================
+; Multiboot2 Header (REQUIRED for GRUB2)
+; =============================================
+section .multiboot2
 align 8
-dd 0xE85250D6
-dd 0
-dd header_end - header_start
-dd -(0xE85250D6 + 0 + (header_end - header_start))
+mb2_start:
+    dd 0xE85250D6               ; Multiboot2 magic
+    dd 0                        ; Architecture: i386 protected mode
+    dd mb2_end - mb2_start      ; Header length
+    dd -(0xE85250D6 + 0 + (mb2_end - mb2_start))  ; Checksum
+    ; End tag
+    dw 0
+    dw 0
+    dd 8
+mb2_end:
 
-header_start:
-dw 0
-dw 0
-dd 8
-header_end:
+; =============================================
+; Stack (16-byte aligned, required by x86_64 ABI)
+; =============================================
+section .bss
+align 16
+stack_bottom:
+    resb 16384          ; 16 KiB stack
+stack_top:
 
+; =============================================
+; Entry point
+; =============================================
 section .text
 global _start
-extern kernel_main
+extern long_mode_start
 
 _start:
     cli
-    call kernel_main
+    mov esp, stack_top
+    call long_mode_start
 
 hang:
     hlt

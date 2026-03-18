@@ -13,7 +13,11 @@ void vga_print(const char* str)
 {
     while(*str)
     {
-        VGA[cursor++] = 0x0F00 | *str;
+        if(*str == '\n')
+            cursor += 80 - cursor % 80;
+        else
+            VGA[cursor++] = 0x0F00 | *str;
+
         str++;
     }
 }
