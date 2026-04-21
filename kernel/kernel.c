@@ -1,15 +1,15 @@
-#include "../include/vga.h"
+#include "../include/framebuffer.h"
+#include "../include/gui.h"
+#include "../include/ps2.h"
 
-void kernel_main()
-{
-    vga_clear();
+extern uint64_t multiboot_info_ptr;
 
-    // vga_print("x86_64 Kernel Started\n");
-    // vga_print("Running in Long Mode\n");
-    vga_print("Welcome to HiuraOS!\n");
-    vga_print("This kernel still WIP\n");
-
-
-    while(1)
-        __asm__("hlt");
+void kernel_main(void) {
+    fb_init(multiboot_info_ptr);
+    ps2_init();
+    gui_init();
+    while (1) {
+        ps2_poll();
+        gui_render();
+    }
 }
